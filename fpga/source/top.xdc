@@ -1,5 +1,9 @@
+create_clock -period  5.000 -name sysclk_p         -waveform {0.000 2.500} [get_ports {sysclk_p}]
 create_clock -period 10.000 -name pcie_clkin_clk_p -waveform {0.000 5.000} [get_ports {pcie_clkin_clk_p}]
-set_max_delay -from [get_clocks sysclk_p] -to [get_ports {ledn[*]}] -datapath_only  20.0
+
+set_property IOSTANDARD LVDS_25     [get_ports sysclk_*]
+set_property PACKAGE_PIN J19        [get_ports sysclk_p]
+set_property PACKAGE_PIN H19        [get_ports sysclk_n]
 
 set_property PACKAGE_PIN F6     [get_ports pcie_clkin_clk_p]
 set_property PACKAGE_PIN E6     [get_ports pcie_clkin_clk_n]

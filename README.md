@@ -46,3 +46,13 @@ $ sudo setpci -s ${PCIE_RP} CAP_EXP+0x10.B=0x50
 $ sudo setpci -s ${PCIE_RP} CAP_EXP+0x10.B=0x40
 $ echo 1 | sudo tee /sys/bus/pci/rescan
 ```
+
+Documentation
+=============
+
+- 7 series PCIe controller - https://www.xilinx.com/support/documents/ip_documentation/pcie_7x/v3_3/pg054-7series-pcie.pdf
+
+Credits
+=======
+
+- Build system and constraints based on example from - https://github.com/hdlguy/litefury_pcie

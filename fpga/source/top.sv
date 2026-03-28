@@ -1,6 +1,12 @@
+`default_nettype none
+
 module top (
-  input  logic      pcie_clkin_clk_p, pcie_clkin_clk_n,
-  input  logic      pcie_reset,
+  input  wire       sysclk_p,
+  input  wire       sysclk_n,
+  input  wire       pcie_clkin_clk_p, pcie_clkin_clk_n,
+  input  wire[3:0]  pcie_mgt_rxn, pcie_mgt_rxp,
+  output logic[3:0] pcie_mgt_txn, pcie_mgt_txp,
+  input  wire       pcie_reset,
   output logic      pcie_clkreq_l,
   output logic[3:0] ledn
 );
@@ -8,50 +14,32 @@ module top (
   assign pcie_clkreq_l = 1'b0; // Always request clock
   assign ledn = 4'b0101;
 
-  logic pcie_clkin, clk;
-  IBUFDS_GTE2 #(
-    .CLKCM_CFG("TRUE"),
-    .CLKRCV_TRST("TRUE"),
-    .CLKSWING_CFG(2'b11)
-  ) u_ibufds_gte2 (
-    .O(pcie_clkin),
-    .ODIV2(),
-    .CEB(1'b0),
-    .I(pcie_clkin_clk_p),
-    .IB(pcie_clkin_clk_n)
-  );
-  BUFG u_bufg (
-    .O(clk),
-    .I(pcie_clkin)
-  );
+  logic clk;
+  IBUFDS #(.DIFF_TERM("TRUE"), .IBUF_LOW_PWR("TRUE"), .IOSTANDARD("DEFAULT")) u_ibufds (.O(clk), .I(sysclk_p), .IB(sysclk_n));
 
   //
-  // JTAG access
+  // System
   //
-  logic capture, drck, sel, shift, tdi, tdo;
-  logic [31:0] sr;
-
-  BSCANE2 #(
-    .JTAG_CHAIN(1)
-  ) u_bscane2_1 (
-    .CAPTURE(capture),
-    .DRCK(drck),
-    .RESET(),
-    .RUNTEST(),
-    .SEL(sel),
-    .SHIFT(shift),
-    .TCK(),
-    .TDI(tdi),
-    .TMS(),
-    .UPDATE(),
-    .TDO(tdo)
+  system u_system(
+    .pcie_clkin_clk_n (pcie_clkin_clk_n),
+    .pcie_clkin_clk_p (pcie_clkin_clk_p),
+    .pcie_mgt_rxn     (pcie_mgt_rxn),
+    .pcie_mgt_rxp     (pcie_mgt_rxp),
+    .pcie_mgt_txn     (pcie_mgt_txn),
+    .pcie_mgt_txp     (pcie_mgt_txp),
+    .pcie_reset       (pcie_reset)
   );
 
-  assign tdo = sr[0];
-  always_ff @(posedge drck) begin
-    if (capture) sr <= 32'hcafebabe;
-    else if (shift) sr <= {1'b0, sr[31:1]};
+  logic [31:0] cntr;
+  always_ff @(posedge clk) begin
+    cntr <= cntr + 1;
   end
+
+  ila u_ila(
+    .clk(clk),
+    .trigger_in(cntr == 32'h8000_0000),
+    .sample_in(cntr)
+  );
 
 endmodule
 
