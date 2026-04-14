@@ -102,7 +102,7 @@ class JtagILA:
 #
 
 ila = JtagILA(openocd_host='localhost', openocd_port=4444)
-ila.setTrigPos(0.5)
+ila.setTrigPos(0.80)
 ila.readStatus()
 ila.writeCtrl(start=True, stop=False)
 while not ila.isTriggerd():

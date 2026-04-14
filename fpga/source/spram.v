@@ -25,7 +25,7 @@ module spram(clk, rst, ce, we, oe, addr, din, dout);
 	// Default address and data buses width (1024*32)
 	//
 	parameter aw = 10; //number of address-bits
-	parameter dw = 32; //number of data-bits
+	parameter dw = 40; //number of data-bits
 
 	//
 	// Generic synchronous single-port RAM interface

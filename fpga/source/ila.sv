@@ -20,7 +20,10 @@ module ila #(
 
   logic [WIDTH-1:0] ram_do;
 
-  spram u_ram(
+  spram #(
+    .aw($clog2(DEPTH)),
+    .dw(WIDTH)
+  ) u_ram(
     .clk(running ? clk : drck2),
     .rst(1'b0),
     .ce(1'b1),
@@ -47,7 +50,7 @@ module ila #(
   always_ff @(posedge clk) begin
     if (update1_clk_pulse & sr1_in[1]) running <= 0; // Stop command
     else if (update1_clk_pulse & sr1_in[0]) running <= 1; // Start command
-    else if (triggered && post_trig_cntr == 0) running <= 0;
+    else if (triggered && post_trig_cntr == 2) running <= 0; // Compensate for latency
   end
 
   always_ff @(posedge clk) begin

@@ -17,15 +17,9 @@ foreach port [get_ports] {
   set package_pin [get_property PACKAGE_PIN [get_ports $port]]
   puts "$package_pin\t$port"
 }
-reset_property LOC [get_cells {u_system/pcie_7x_0/inst/inst/gt_top_i/pipe_wrapper_i/pipe_lane[3].gt_wrapper_i/gtp_channel.gtpe2_channel_i}]
-reset_property LOC [get_cells {u_system/pcie_7x_0/inst/inst/gt_top_i/pipe_wrapper_i/pipe_lane[0].gt_wrapper_i/gtp_channel.gtpe2_channel_i}]
-reset_property LOC [get_cells {u_system/pcie_7x_0/inst/inst/gt_top_i/pipe_wrapper_i/pipe_lane[2].gt_wrapper_i/gtp_channel.gtpe2_channel_i}]
-reset_property LOC [get_cells {u_system/pcie_7x_0/inst/inst/gt_top_i/pipe_wrapper_i/pipe_lane[1].gt_wrapper_i/gtp_channel.gtpe2_channel_i}]
+reset_property LOC [get_cells {pcie_7x_0_i/inst/inst/gt_top_i/pipe_wrapper_i/pipe_lane[0].gt_wrapper_i/gtp_channel.gtpe2_channel_i}]
 
-set_property LOC GTPE2_CHANNEL_X0Y7 [get_cells {u_system/pcie_7x_0/inst/inst/gt_top_i/pipe_wrapper_i/pipe_lane[3].gt_wrapper_i/gtp_channel.gtpe2_channel_i}]
-set_property LOC GTPE2_CHANNEL_X0Y6 [get_cells {u_system/pcie_7x_0/inst/inst/gt_top_i/pipe_wrapper_i/pipe_lane[0].gt_wrapper_i/gtp_channel.gtpe2_channel_i}]
-set_property LOC GTPE2_CHANNEL_X0Y5 [get_cells {u_system/pcie_7x_0/inst/inst/gt_top_i/pipe_wrapper_i/pipe_lane[2].gt_wrapper_i/gtp_channel.gtpe2_channel_i}]
-set_property LOC GTPE2_CHANNEL_X0Y4 [get_cells {u_system/pcie_7x_0/inst/inst/gt_top_i/pipe_wrapper_i/pipe_lane[1].gt_wrapper_i/gtp_channel.gtpe2_channel_i}]
+set_property LOC GTPE2_CHANNEL_X0Y6 [get_cells {pcie_7x_0_i/inst/inst/gt_top_i/pipe_wrapper_i/pipe_lane[0].gt_wrapper_i/gtp_channel.gtpe2_channel_i}]
 
 puts "PACKAGE_PINs after remap"
 foreach port [get_ports] {
