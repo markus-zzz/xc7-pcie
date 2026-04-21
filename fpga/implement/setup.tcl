@@ -10,9 +10,7 @@ add_files ../source/pcie_7x_0.xci
 update_ip_catalog
 
 reset_target all [get_ips pcie_7x_0]
-generate_target {synthesis} [get_ips pcie_7x_0]
-
-synth_ip [get_ips pcie_7x_0]
+generate_target {instantiation_template synthesis} [get_ips pcie_7x_0]
 
 add_files ../source/spram.v
 add_files ../source/ila.sv
@@ -21,7 +19,6 @@ add_files ../source/top.sv
 add_files -fileset constrs_1 ../source/top.xdc
 
 set_property used_in_synthesis true  [get_files */synth/pcie_7x_0.v]
-set_property used_in_synthesis false [get_files */sim/pcie_7x_0.v]
 
 update_compile_order -fileset sources_1
 

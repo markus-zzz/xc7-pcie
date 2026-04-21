@@ -37,6 +37,8 @@ module top (
   logic user_clk_out;
   logic user_reset_out;
   logic [5:0]pl_ltssm_state;
+  logic [63:0] rx_tdata;
+  logic        rx_tvalid;
 
 pcie_7x_0 pcie_7x_0_i
 (
@@ -44,8 +46,8 @@ pcie_7x_0 pcie_7x_0_i
   .pci_exp_txn(pcie_mgt_txn),                // output wire [0 : 0] pci_exp_txn
   .pci_exp_rxp(pcie_mgt_rxp),                // input wire [0 : 0] pci_exp_rxp
   .pci_exp_rxn(pcie_mgt_rxn),                // input wire [0 : 0] pci_exp_rxn
-  .user_clk_out(),                           // output wire user_clk_out
-  .user_reset_out(),                         // output wire user_reset_out
+  .user_clk_out(user_clk_out),               // output wire user_clk_out
+  .user_reset_out(user_reset_out),           // output wire user_reset_out
   .user_lnk_up(),                            // output wire user_lnk_up
   .user_app_rdy(),                           // output wire user_app_rdy
   .s_axis_tx_tready(),                       // output wire s_axis_tx_tready
@@ -54,10 +56,10 @@ pcie_7x_0 pcie_7x_0_i
   .s_axis_tx_tlast(0),                       // input wire s_axis_tx_tlast
   .s_axis_tx_tvalid(0),                      // input wire s_axis_tx_tvalid
   .s_axis_tx_tuser(0),                       // input wire [3 : 0] s_axis_tx_tuser
-  .m_axis_rx_tdata(),                        // output wire [63 : 0] m_axis_rx_tdata
+  .m_axis_rx_tdata(rx_tdata),                // output wire [63 : 0] m_axis_rx_tdata
   .m_axis_rx_tkeep(),                        // output wire [7 : 0] m_axis_rx_tkeep
   .m_axis_rx_tlast(),                        // output wire m_axis_rx_tlast
-  .m_axis_rx_tvalid(),                       // output wire m_axis_rx_tvalid
+  .m_axis_rx_tvalid(rx_tvalid),              // output wire m_axis_rx_tvalid
   .m_axis_rx_tready(1'b1),                   // input wire m_axis_rx_tready
   .m_axis_rx_tuser(),                        // output wire [21 : 0] m_axis_rx_tuser
   .cfg_interrupt(0),                         // input wire cfg_interrupt
@@ -71,6 +73,26 @@ pcie_7x_0 pcie_7x_0_i
   .cfg_interrupt_msixfm(),                   // output wire cfg_interrupt_msixfm
   .cfg_interrupt_stat(0),                    // input wire cfg_interrupt_stat
   .cfg_pciecap_interrupt_msgnum(0),          // input wire [4 : 0] cfg_pciecap_interrupt_msgnum
+  .pl_directed_link_change(0),               // input wire [1 : 0] pl_directed_link_change
+  .pl_directed_link_width(0),                // input wire [1 : 0] pl_directed_link_width
+  .pl_directed_link_speed(0),                // input wire pl_directed_link_speed
+  .pl_directed_link_auton(0),                // input wire pl_directed_link_auton
+  .pl_upstream_prefer_deemph(0),             // input wire pl_upstream_prefer_deemph
+  .pl_sel_lnk_rate(),                        // output wire pl_sel_lnk_rate
+  .pl_sel_lnk_width(),                       // output wire [1 : 0] pl_sel_lnk_width
+  .pl_ltssm_state(pl_ltssm_state),           // output wire [5 : 0] pl_ltssm_state
+  .pl_lane_reversal_mode(),                  // output wire [1 : 0] pl_lane_reversal_mode
+  .pl_phy_lnk_up(),                          // output wire pl_phy_lnk_up
+  .pl_tx_pm_state(),                         // output wire [2 : 0] pl_tx_pm_state
+  .pl_rx_pm_state(),                         // output wire [1 : 0] pl_rx_pm_state
+  .pl_link_upcfg_cap(),                      // output wire pl_link_upcfg_cap
+  .pl_link_gen2_cap(),                       // output wire pl_link_gen2_cap
+  .pl_link_partner_gen2_supported(),         // output wire pl_link_partner_gen2_supported
+  .pl_initial_link_width(),                  // output wire [2 : 0] pl_initial_link_width
+  .pl_directed_change_done(),                // output wire pl_directed_change_done
+  .pl_received_hot_rst(),                    // output wire pl_received_hot_rst
+  .pl_transmit_hot_rst(0),                   // input wire pl_transmit_hot_rst
+  .pl_downstream_deemph_source(0),           // input wire pl_downstream_deemph_source
   .sys_clk(pcie_clkin),                      // input wire sys_clk
   .sys_rst_n(pcie_reset),                    // input wire sys_rst_n
   .pcie_drp_clk(0),                          // input wire pcie_drp_clk
@@ -82,17 +104,12 @@ pcie_7x_0 pcie_7x_0_i
   .pcie_drp_rdy()                            // output wire pcie_drp_rdy
   );
 
-  logic [31:0] cntr;
-  always_ff @(posedge clk) begin
-    cntr <= cntr + 1;
-  end
-
   ila #(
-    .WIDTH(40)
+    .WIDTH(65)
   ) u_ila(
-    .clk(clk),
-    .trigger_in(cntr == 32'h8000_0000),
-    .sample_in({cntr[0], pcie_reset, pl_ltssm_state, cntr})
+    .clk(user_clk_out),
+    .trigger_in(rx_tvalid),
+    .sample_in({rx_tvalid, rx_tdata})
   );
 
 endmodule

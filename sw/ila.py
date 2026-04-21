@@ -34,7 +34,7 @@ class JtagILA:
       conn.readline()
       conn.readline()
       cmd = (self._post_trig_cntr << 16) | (0x2 if stop else 0) | (0x1 if start else 0)
-      print(hex(cmd))
+      #print(hex(cmd))
       conn.write('drscan xc7.tap 64 {}\r\n'.format(hex(cmd)))
       resp = conn.readline()
       resp = conn.readline()
@@ -55,7 +55,6 @@ class JtagILA:
       self._trigidx = int(resp[8:12], 16)
       self._triggerd = int(resp[12:16], 16) & 2 != 0
       self._running = int(resp[12:16], 16) & 1 != 0
-      print("depth: {} width: {} trigidx: {} triggerd: {} running: {}".format(self._depth, self._width, self._trigidx, self._triggerd, self._running))
 
   def readData(self):
     self._data = []
@@ -85,13 +84,18 @@ class JtagILA:
   def setTrigPos(self, pos): # pos in range [0,1]
     self._post_trig_cntr = int(self._depth * pos)
 
-  def isTriggerd(self):
-    self.readStatus()
-    return self._triggerd
+  def waitTrigger(self):
+    while True:
+      self.readStatus()
+      print("\rdepth: {} width: {} trigidx: {} triggerd: {} running: {}".format(self._depth, self._width, self._trigidx, self._triggerd, self._running), end='')
+      if self._triggerd:
+        break
+      time.sleep(1)
 
   def printData(self):
     offset = self._trigidx + self._post_trig_cntr
-    print('offset {} trigidx {} post_trig_cntr {}'.format(offset, self._trigidx, self._post_trig_cntr))
+    print('\n==========================')
+    print('offset: {} trigidx: {} post_trig_cntr: {}'.format(offset, self._trigidx, self._post_trig_cntr))
     for idx in range(self._depth):
       idx2 = (offset + idx) % self._depth
       d = self._data[idx2]
@@ -105,9 +109,7 @@ ila = JtagILA(openocd_host='localhost', openocd_port=4444)
 ila.setTrigPos(0.80)
 ila.readStatus()
 ila.writeCtrl(start=True, stop=False)
-while not ila.isTriggerd():
-  print('waiting for trigger')
-  time.sleep(1)
+ila.waitTrigger()
 ila.readStatus()
 ila.readData()
 ila.printData()
